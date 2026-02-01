@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Prediction | Predict Future Stock Trends</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary: #0f172a;
+            --accent: #10b981;
+            --danger: #ef4444;
+            --bg-light: #f8fafc;
+            --text-main: #334155;
+            --text-light: #64748b;
+            --white: #ffffff;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* --- Header & Nav --- */
+        header {
+            background-color: var(--white);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo span {
+            color: var(--primary);
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-main);
+            margin-left: 2rem;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        /* --- Hero Section --- */
+        .hero {
+            background: linear-gradient(135deg, var(--secondary) 0%, #1e293b 100%);
+            color: var(--white);
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            color: #cbd5e1;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+
+        /* --- Main App Container --- */
+        .app-container {
+            max-width: 1200px;
+            margin: -3rem auto 3rem;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .dashboard {
+            background: var(--white);
+            border-radius: var(--radius);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            overflow: hidden;
+            min-height: 500px;
+        }
+
+        /* --- Sidebar Controls --- */
+        .controls {
+            background-color: #f1f5f9;
+            padding: 2rem;
+            border-right: 1px solid #e2e8f0;
+        }
+
+        .control-group {
+            margin-bottom: 2rem;
+        }
+
+        .control-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        select, button {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            font-size: 1rem;
+            background: var(--white);
+            transition: all 0.2s;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        button.primary-btn {
+            background-color: var(--primary);
+            color: var(--white);
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+
+        button.primary-btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        button.primary-btn:active {
+            transform: translateY(0);
+        }
+
+        .model-radio {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--white);
+            padding: 0.5rem;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            cursor: pointer;
+        }
+
+        .radio-option:hover {
+            border-color: var(--primary);
+        }
+
+        input[type="radio"] {
+            accent-color: var(--primary);
+        }
+
+        /* --- Visualization Area --- */
+        .visualization {
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .stat-card h4 {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-card .value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--secondary);
+        }
+
+        .stat-card .trend {
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .trend.up { color: var(--accent); }
+        .trend.down { color: var(--danger); }
+
+        .chart-container {
+            flex-grow: 1;
+            position: relative;
+            background: var(--white);
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            width: 100%;
+            height: 350px;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* --- Info Sections (PPT Content) --- */
+        .info-sections {
+            max-width: 1200px;
+            margin: 0 auto 4rem;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .info-card {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border-top: 4px solid var(--primary);
+        }
+
+        .info-card h2 {
+            font-size: 1.5rem;
+            color: var(--secondary);
+            margin-bottom: 1rem;
+        }
+
+        .info-card p {
+            color: var(--text-main);
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .info-card ul {
+            padding-left: 1.5rem;
+            color: var(--text-main);
+        }
+
+        .info-card li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* --- Footer --- */
+        footer {
+            background-color: var(--secondary);
+            color: #94a3b8;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .contact-info p {
+            margin-bottom: 0.5rem;
+        }
+
+        /* --- Toast Notification --- */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--secondary);
+            color: var(--white);
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transform: translateY(150%);
+            transition: transform 0.3s ease-out;
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+        }
+
+        .loader {
+            width: 18px;
+            height: 18px;
+            border: 2px solid #ffffff;
+            border-bottom-color: transparent;
+            border-radius: 50%;
+            display: inline-block;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+        }
+
+        @keyframes rotation {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* --- Responsive --- */
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            .controls {
+                border-right: none;
+                border-bottom: 1px solid #e2e8f0;
+            }
+            .info-sections {
+                grid-template-columns: 1fr;
+            }
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <nav>
+            <div class="logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg>
+                Stock<span>Vision</span>
+            </div>
+            <div class="nav-links">
+                <a href="#app">Tool</a>
+                <a href="#models">Models</a>
+                <a href="#about">About</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>Predict Future Stock Trends Effectively</h1>
+        <p>Leveraging advanced LSTM and ARIMA models to visualize historical data and forecast market movements with precision.</p>
+    </section>
+
+    <!-- Main App Tool -->
+    <section class="app-container" id="app">
+        <div class="dashboard">
+            <!-- Controls -->
+            <aside class="controls">
+                <div class="control-group">
+                    <label for="stockSelect">Select Company Stock</label>
+                    <select id="stockSelect">
+                        <option value="AAPL">Apple Inc. (AAPL)</option>
+                        <option value="TSLA">Tesla, Inc. (TSLA)</option>
+                        <option value="GOOGL">Alphabet Inc. (GOOGL)</option>
+                        <option value="AMZN">Amazon.com, Inc. (AMZN)</option>
+                        <option value="MSFT">Microsoft Corp. (MSFT)</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label>Prediction Model</label>
+                    <div class="model-radio">
+                        <label class="radio-option">
+                            <input type="radio" name="model" value="LSTM" checked>
+                            <div>
+                                <strong>LSTM</strong>
+                                <div style="font-size: 0.75rem; color: #64748b;">Deep Learning (Long Short-Term Memory)</div>
+                            </div>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="model" value="ARIMA">
+                            <div>
+                                <strong>ARIMA</strong>
+                                <div style="font-size: 0.75rem; color: #64748b;">Statistical (AutoRegressive Integrated Moving Average)</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <button class="primary-btn" id="analyzeBtn" onclick="runAnalysis()">Analyze & Predict</button>
+            </aside>
+
+            <!-- Visualization -->
+            <main class="visualization">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h4>Current Price</h4>
+                        <div class="value" id="currentPrice">--</div>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Predicted (Next Day)</h4>
+                        <div class="value" id="predictedPrice">--</div>
+                        <div class="trend" id="trendIndicator">--</div>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Model Confidence</h4>
+                        <div class="value" id="confidenceScore">--%</div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="stockChart"></canvas>
+                </div>
+            </main>
+        </div>
+    </section>
+
+    <!-- Information Sections (PPT Content) -->
+    <div class="info-sections" id="models">
+        
+        <!-- Vision & Strategy -->
+        <article class="info-card">
+            <h2>Vision & Strategy</h2>
+            <p><strong>Purpose and Benefits:</strong> This app aims to provide investors and analysts with accurate stock trend forecasts using historical data patterns. It helps in making informed decisions by offering visual insights and automated predictions.</p>
+            <ul>
+                <li>Improved investment strategies</li>
+                <li>Risk management</li>
+                <li>Real-time data interaction for dynamic analysis</li>
+            </ul>
+        </article>
+
+        <!-- LSTM Model -->
+        <article class="info-card">
+            <h2>LSTM Model</h2>
+            <p>The <strong>Long Short-Term Memory (LSTM)</strong> model excels at capturing complex temporal dependencies in stock price data. It uses memory gates to retain relevant information over long periods.</p>
+            <p><strong>Key Strength:</strong> Enhances prediction accuracy for volatile financial markets by adapting to nonlinear trends and seasonality effectively.</p>
+        </article>
+
+        <!-- ARIMA Model -->
+        <article class="info-card">
+            <h2>ARIMA Model Application</h2>
+            <p>The <strong>ARIMA</strong> model applies statistical methods to model and forecast stock prices based on trend and seasonality patterns. It is especially effective for stationary time series data.</p>
+            <p><strong>Key Strength:</strong> Provides interpretable results and complements LSTM by capturing different facets of data dynamics with robust time series analysis.</p>
+        </article>
+
+        <!-- Data Collection -->
+        <article class="info-card">
+            <h2>Data Collection & Preprocessing</h2>
+            <p>Accurate predictions rely on clean, comprehensive data. The process includes gathering historical stock prices, handling missing values, and normalizing datasets.</p>
+            <p>Feature engineering enhances model input with technical indicators. Preprocessing ensures high-quality data, forming the foundation for reliable forecasting models.</p>
+        </article>
+    </div>
+
+    <!-- Footer -->
+    <footer id="about">
+        <div class="footer-content">
+            <div class="contact-info">
+                <p>Have questions? Contact us at youremail@freepik.com</p>
+                <p>+00 000 000 000 | yourwebsite.com</p>
+            </div>
+            <div class="attribution">
+                <p>&copy; 2023 Stock Prediction App. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Component -->
+    <div id="toast" class="toast">
+        <span id="toastIcon"></span>
+        <span id="toastMessage">Notification</span>
+    </div>
+
+    <!-- Application Logic -->
+    <script>
+        // --- Configuration & State ---
+        const STOCK_DATA = {
+            'AAPL': { base: 150, volatility: 2.5, name: 'Apple Inc.' },
+            'TSLA': { base: 240, volatility: 8.0, name: 'Tesla, Inc.' },
+            'GOOGL': { base: 130, volatility: 2.0, name: 'Alphabet Inc.' },
+            'AMZN': { base: 135, volatility: 2.2, name: 'Amazon.com' },
+            'MSFT': { base: 330, volatility: 3.0, name: 'Microsoft Corp.' }
+        };
+
+        const CHART_CONFIG = {
+            daysHistory: 60,
+            daysPrediction: 10,
+            padding: 40
+        };
+
+        let currentState = {
+            symbol: 'AAPL',
+            model: 'LSTM',
+            data: [],
+            prediction: []
+        };
+
+        // --- Utilities ---
+        function formatCurrency(num) {
+            return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(num);
+        }
+
+        function showToast(message, type = 'info', isLoading = false) {
+            const toast = document.getElementById('toast');
+            const msgEl = document.getElementById('toastMessage');
+            const iconEl = document.getElementById('toastIcon');
+
+            msgEl.textContent = message;
+            
+            if(isLoading) {
+                iconEl.innerHTML = '<span class="loader"></span>';
+            } else {
+                iconEl.innerHTML = type === 'success' ? '✅' : 'ℹ️';
+            }
+
+            toast.classList.add('show');
+            if (!isLoading) {
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 3000);
+            }
+            return toast;
+        }
+
+        // --- Data Simulation (Data Science Simulation) ---
+        function generateStockData(symbol) {
+            const config = STOCK_DATA[symbol];
+            const prices = [];
+            let currentPrice = config.base;
+            
+            // Generate history
+            for (let i = 0; i < CHART_CONFIG.daysHistory; i++) {
+                const change = (Math.random() - 0.5) * config.volatility;
+                currentPrice += change;
+                prices.push({
+                    day: i,
+                    price: Math.max(1, currentPrice), // Ensure positive
+                    type: 'history'
+                });
+            }
+
+            return prices;
+        }
+
+        function simulatePrediction(historyData, modelType) {
+            const predictions = [];
+            const lastPrice = historyData[historyData.length - 1].price;
+            let currentPred = lastPrice;
+            const config = STOCK_DATA[currentState.symbol];
+
+            // Simulate Model Logic
+            for (let i = 1; i <= CHART_CONFIG.daysPrediction; i++) {
+                let trend = 0;
+                
+                if (modelType === 'LSTM') {
+                    // LSTM: Smoother, captures momentum, potentially more aggressive
+                    trend = (Math.random() - 0.45) * (config.volatility * 0.8); 
+                } else {
+                    // ARIMA: Mean reversion, statistical, tighter bounds
+                    trend = (Math.random() - 0.5) * (config.volatility * 1.1);
+                }
+
+                currentPred += trend;
+                predictions.push({
+                    day: CHART_CONFIG.daysHistory + i - 1,
+                    price: Math.max(1, currentPred),
+                    type: 'prediction'
+                });
+            }
+
+            return predictions;
+        }
+
+        // --- Custom Canvas Charting Engine ---
+        class StockChart {
+            constructor(canvasId) {
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext('2d');
+                this.resize();
+                
+                window.addEventListener('resize', () => {
+                    this.resize();
+                    this.draw();
+                });
+            }
+
+            resize() {
+                // Handle HiDPI displays
+                const rect = this.canvas.parentElement.getBoundingClientRect();
+                this.canvas.width = rect.width * 2;
+                this.canvas.height = rect.height * 2;
+                this.ctx.scale(2, 2);
+                this.width = rect.width;
+                this.height = rect.height;
+            }
+
+            draw(history, prediction) {
+                const ctx = this.ctx;
+                const allData = [...history, ...prediction];
+                const padding = CHART_CONFIG.padding;
+                
+                // Clear canvas
+                ctx.clearRect(0, 0, this.width, this.height);
+
+                // Determine scales
+                const prices = allData.map(d => d.price);
+                const minPrice = Math.min(...prices) * 0.995;
+                const maxPrice = Math.max(...prices) * 1.005;
+                const range = maxPrice - minPrice;
+                
+                const getX = (index) => padding + (index / (allData.length - 1)) * (this.width - padding * 2);
+                const getY = (price) => this.height - padding - ((price - minPrice) / range) * (this.height - padding * 2);
+
+                // Draw Grid
+                ctx.beginPath();
+                ctx.strokeStyle = '#e2e8f0';
+                ctx.lineWidth = 1;
+                // Horizontal lines
+                for (let i = 0; i <= 4; i++) {
+                    const y = padding + (i / 4) * (this.height - padding * 2);
+                    ctx.moveTo(padding, y);
+                    ctx.lineTo(this.width - padding, y);
+                    
+                    // Y-axis Labels
+                    const priceLabel = (maxPrice - (i/4) * range).toFixed(2);
+                    ctx.fillStyle = '#94a3b8';
+                    ctx.font = '10px sans-serif';
+                    ctx.fillText(priceLabel, 5, y + 3);
+                }
+                ctx.stroke();
+
+                // Draw History Line (Solid Blue)
+                this.drawLine(history, getX, getY, '#2563eb', false);
+                
+                // Draw Prediction Line (Dashed Green)
+                this.drawLine(prediction, getX, getY, '#10b981', true);
+
+                // Draw Divider Line
+                const dividerX = getX(history.length - 1);
+                ctx.beginPath();
+                ctx.setLineDash([5, 5]);
+                ctx.strokeStyle = '#64748b';
+                ctx.lineWidth = 1;
+                ctx.moveTo(dividerX, padding);
+                ctx.lineTo(dividerX, this.height - padding);
+                ctx.stroke();
+                ctx.setLineDash([]); // Reset
+
+                // Legend
+                ctx.fillStyle = '#2563eb';
+                ctx.fillRect(padding + 10, padding, 10, 10);
+                ctx.fillStyle = '#334155';
+                ctx.fillText("Historical Data", padding + 25, padding + 9);
+
+                ctx.fillStyle = '#10b981';
+                ctx.fillRect(padding + 120, padding, 10, 10);
+                ctx.fillStyle = '#334155';
+                ctx.fillText(`${currentState.model} Forecast`, padding + 135, padding + 9);
+            }
+
+            drawLine(data, getX, getY, color, isDashed) {
+                const ctx = this.ctx;
+                ctx.beginPath();
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 3;
+                if (isDashed) ctx.setLineDash([6, 4]);
+                
+                data.forEach((point, i) => {
+                    const x = getX(point.day);
+                    const y = getY(point.price);
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                });
+                
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+        }
+
+        // --- Main Logic Controller ---
+        const chartEngine = new StockChart('stockChart');
+
+        function runAnalysis() {
+            const btn = document.getElementById('analyzeBtn');
+            const originalText = btn.textContent;
+            const symbol = document.getElementById('stockSelect').value;
+            const model = document.querySelector('input[name="model"]:checked').value;
+
+            // Update UI State
+            currentState.symbol = symbol;
+            currentState.model = model;
+            
+            // Show Loading
+            btn.disabled = true;
+            btn.innerHTML = 'Processing...';
+            showToast(`Running ${model} model for ${symbol}...`, 'info', true);
+
+            // Simulate Network/Processing Delay
+            setTimeout(() => {
+                // 1. Generate Data
+                const history = generateStockData(symbol);
+                const prediction = simulatePrediction(history, model);
+                currentState.data = history;
+                currentState.prediction = prediction;
+
+                // 2. Update Stats
+                const current = history[history.length - 1].price;
+                const predicted = prediction[prediction.length - 1].price; // Prediction for the end of forecast
+                const nextDay = prediction[0].price;
+                
+                // Calculate trend based on next day vs current
+                const isUp = nextDay >= current;
+                const percentChange = ((nextDay - current) / current) * 100;
+
+                document.getElementById('currentPrice').textContent = formatCurrency(current);
+                document.getElementById('predictedPrice').textContent = formatCurrency(nextDay);
+                
+                const trendEl = document.getElementById('trendIndicator');
+                trendEl.textContent = `${isUp ? '▲' : '▼'} ${Math.abs(percentChange).toFixed(2)}%`;
+                trendEl.className = `trend ${isUp ? 'up' : 'down'}`;
+
+                // Random confidence score based on model
+                const confidence = model === 'LSTM' 
+                    ? (85 + Math.random() * 10).toFixed(1) 
+                    : (78 + Math.random() * 12).toFixed(1);
+                
+                document.getElementById('confidenceScore').textContent = `${confidence}%`;
+
+                // 3. Render Chart
+                chartEngine.draw(history, prediction);
+
+                // Reset UI
+                btn.disabled = false;
+                btn.textContent = originalText;
+                showToast('Analysis Complete', 'success');
+
+            }, 1200); // 1.2s simulated delay
+        }
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initial render with default values
+            runAnalysis();
+        });
+
+    </script>
+</body>
+</html>
